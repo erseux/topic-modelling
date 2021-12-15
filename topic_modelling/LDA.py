@@ -1,4 +1,4 @@
-from data_loader import DataLoader
+from topic_modelling.data_loader import DataLoader
 import numpy as np
 import time
 import pandas as pd
