@@ -158,15 +158,15 @@ class LDA:
         
         self.perplexities = perplexities
 
-    def plot_perplexity(self):
+    def plot_perplexity(self, path="images/LDA/perplexity"):
         """
         Plots the perplexities for each iteration from the sampling
         """
         plt.plot(*zip(*self.perplexities))
         plt.title(f"Perplexity for {self.N_D} documents and {self.N_T} topics")
-        plt.savefig(f"images/LDA/perplexity/{self.N_D}rows_{self.N_T}topics_{self.ITERATIONS}it.png")
+        plt.savefig(f"{path}/{self.N_D}rows_{self.N_T}topics_{self.ITERATIONS}it.png")
 
-    def plot_word_clouds_all(self):
+    def plot_word_clouds_all(self, path="images/LDA/wordcloud"):
         """
         Plot wordclouds for all topics in the model
         """
@@ -181,7 +181,7 @@ class LDA:
         axs[-1, -1].axis('off')
         
         fig.suptitle(f"Wordclouds n={self.N_D}", fontsize=30)
-        plt.savefig(f"images/LDA/wordcloud/cloud_{self.N_D}_{self.N_T}.png")
+        plt.savefig(f"{path}/cloud_{self.N_D}_{self.N_T}.png")
 
 def plot_word_cloud(cluster: list, weights: list, ax, n):
     """
