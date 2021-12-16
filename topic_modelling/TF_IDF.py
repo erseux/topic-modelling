@@ -114,7 +114,7 @@ class TFIDFVectorizer:
         return TF_list
 
     def filter_tokens(self):
-        ## If df/self.N_D > 0.5 - remove token
+        ## If df/self.N_D > self.DF_THRESHOLD- remove token
         self.doc_freq = {k:v for k,v in self.doc_freq.items() if v/self.N_D < self.DF_THRESHOLD}
         
     def TF_IFD(self):
