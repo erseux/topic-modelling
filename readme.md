@@ -8,5 +8,7 @@ Made by August Erséus and Ted Strömfelt
 
 ## Notebooks
 ### Change this cell to your folder location
-``import sys``
-``sys.path.insert(0,'/Users/august/Coding/topic-modelling')``
+```python
+import sys
+sys.path.insert(0,'/Users/august/Coding/topic-modelling')
+
