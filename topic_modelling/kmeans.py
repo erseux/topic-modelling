@@ -38,7 +38,7 @@ class KMeansCluster:
         """
         TF_IDF = TFIDFVectorizer()
         self.vectorizer = TF_IDF
-        matrix = TF_IDF.fit(corpus)
+        matrix = TF_IDF.fit(corpus, max_df=0.05)
 
         self.index_to_word = TF_IDF.vocab_i_w
         return matrix
