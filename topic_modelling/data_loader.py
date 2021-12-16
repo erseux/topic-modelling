@@ -11,11 +11,11 @@ class DataLoader:
     Load and process data in csv or DataFrame form
     Save processed data to pickle, and reload same pickle file for faster data access.
     """
-    def __init__(self, language="english", stemming=True, lemmatize=True):
+    def __init__(self, language="english", stemming=True, lemmatize=True, data_column="headline_text"):
 
         self.__path = None
 
-        self.__TEXT_COLUMN = "headline_text"
+        self.__TEXT_COLUMN = data_column
 
         self.__stemming = stemming
         self.__lemmatize = lemmatize
