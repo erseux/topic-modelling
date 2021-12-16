@@ -5,6 +5,7 @@ import pandas as pd
 import math
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
+import tqdm
 
 class LDA:
     def __init__(self, corpus: pd.DataFrame, alpha=0.1, beta=0.1):
@@ -135,7 +136,7 @@ class LDA:
             weights.append(self.topic_word_matrix[z, best_ids][0 : min(self.MAX_WORDS_IN_TOPIC, len(topicword))])
         return topicwords, weights
 
-    def fit(self, num_topics=10, iterations=50, verbosity=True):
+    def fit(self, num_topics=10, iterations=50, verbosity=False):
         """
         Fit/train the LDA model
         input:
@@ -149,14 +150,33 @@ class LDA:
         self.setup()
 
         perplexities = []
+        pbar = tqdm.tqdm(total=self.ITERATIONS)
         for i in range(0, self.ITERATIONS):
             self.gibbs_sampling()
             perplexity = self.perplexity()
             perplexities.append((i, perplexity))
             if verbosity:
                 print(f"{time.strftime('%X')} Iteration: {i} Perplexity: {perplexity}")
+            pbar.update(1)
         
         self.perplexities = perplexities
+        print("Final perplexity:", perplexity)
+
+    def predict_topic(self, data: list):
+        """
+        Predict topic probabilities for a list of processed words
+        """
+        data = [w for w in data if w in self.vocab_w_i]
+        result = np.zeros(self.N_T)
+        for word in data:
+            w_i = self.vocab_w_i[word]
+            result += self.topic_word_matrix[:, w_i] / self.topic_vector
+
+        result /= result.sum()
+        result = [(i+1, v) for i, v in enumerate(result)]
+        sorted_result = sorted(result, key=lambda x:x[1], reverse=True)
+        return sorted_result
+
 
     def plot_perplexity(self, path="images/LDA/perplexity"):
         """
@@ -166,7 +186,7 @@ class LDA:
         plt.title(f"Perplexity for {self.N_D} documents and {self.N_T} topics")
         plt.savefig(f"{path}/{self.N_D}rows_{self.N_T}topics_{self.ITERATIONS}it.png")
 
-    def plot_word_clouds_all(self, path="images/LDA/wordcloud"):
+    def plot_word_clouds_all(self, path="topic_modelling/images/LDA/wordcloud", save=True):
         """
         Plot wordclouds for all topics in the model
         """
@@ -174,14 +194,18 @@ class LDA:
         topics = self.N_T 
         x_dim = math.ceil(topics / 3)
 
-        fig, axs = plt.subplots(3, x_dim, figsize=(24, 14))
+        figsize = (24, 14)
+        if not save:
+            figsize = (15,8)
+        fig, axs = plt.subplots(3, x_dim, figsize=figsize)
         for n in range(len(clusters)):
             j, i = divmod(n, 3)
             plot_word_cloud(clusters[n], weights[n], axs[i, j], n)
         axs[-1, -1].axis('off')
         
         fig.suptitle(f"Wordclouds n={self.N_D}", fontsize=30)
-        plt.savefig(f"{path}/cloud_{self.N_D}_{self.N_T}.png")
+        if save:
+            plt.savefig(f"{path}/cloud_{self.N_D}_{self.N_T}.png")
 
 def plot_word_cloud(cluster: list, weights: list, ax, n):
     """
