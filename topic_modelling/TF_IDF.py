@@ -3,48 +3,42 @@ import pandas as pd
 import numpy as np
 import math
 import collections
+import tqdm
 
 class TFIDFVectorizer:
-    def fit(self, corpus: pd.DataFrame, split_train_test=False):
+    def fit(self, corpus: pd.DataFrame, max_df=1.0):
         """
         Generates a TFIDF matrix from a corpus with processed text.
         input:
             Corpus: pd.DataFrame or pd.Series with a single column containing
                 documents in the shape of lists of words (List[str])
-            split_train_test: True if the data should be split 80/20 into a train
-                and a test set, else False.
+            max_df: float - the Document Frequency threshold for sorting out
+                common words
         return:
             a numpy matrix with TFIDF vectors for all documents
         """
         self.corpus = corpus
-        self.test_corpus = self.split_train_test(split_train_test)
 
         self.N_D = len(self.corpus)
-        self.unique_words = self.get_unique(skip_single_letter=True)
-        self.N_W = len(self.unique_words)
-        self.doc_freq = dict.fromkeys(sorted(self.unique_words), 0)
-        self.vocab_w_i = {j:i for i,j in enumerate(self.doc_freq)}
-        self.vocab_i_w = list(sorted(self.unique_words))
-        self.TF_list = self.frequencies()
-        self.TF_IDF_matrix = self.TF_IFD()
+        
+        self.DF_THRESHOLD = max_df
 
+        self.doc_freq = {}
+
+        self.TF_list = self.frequencies()
+
+        self.filter_tokens()
+
+        self.unique_words = set(self.doc_freq.keys())   # Sätts efter att vi filtrerat ut tokens
+
+        self.N_W = len(self.unique_words)   # Storleken efter filtrering 
+
+        self.vocab_w_i = {j:i for i,j in enumerate(sorted(self.doc_freq.keys()))}
+        self.vocab_i_w = list(self.vocab_w_i.keys())
+
+        self.TF_IDF_matrix = self.TF_IFD()
         print("fitted TF-IDF matrix")
         return self.TF_IDF_matrix
-
-    def split_train_test(self, split_train_test: bool):
-        """
-        if True, splits the corpus into a train and a test part
-        returns the train and test corpuses
-        """
-        if not split_train_test:
-            return None
-        else:
-            train_size = int(n_rows * 0.8)
-            test_size = int(n_rows - train_size)
-            train_corpus = self.corpus.head(train_size)
-            test_corpus = self.corpus.head(-test_size)
-            self.corpus = train_corpus
-            return train_corpus, test_corpus
 
     def fit_test_data(self, df=None):
         """
@@ -98,24 +92,13 @@ class TFIDFVectorizer:
         """ Returns the word corresponding to an index. """
         return self.vocab_i_w[index]
 
-    def get_unique(self, skip_single_letter=False):
-        """
-        Gets unique words from corpus
-        """
-        unique = set()
-        for row in self.corpus:
-            for word in row:
-                if skip_single_letter and len(word) == 1:
-                    continue
-                if word not in unique:
-                    unique.add(word)
-        return unique
-
     def frequencies(self):
         """
         Calculates TF and DF values for all words in unique words
         """
+
         TF_list = []
+        pbar = tqdm.tqdm(total=self.N_D)
         for doc in self.corpus:
             doc_dict = {}
             d_size = len(doc)
@@ -124,10 +107,15 @@ class TFIDFVectorizer:
                 try:
                     self.doc_freq[word] += 1
                 except KeyError:
-                    pass
+                    self.doc_freq[word] = 1
                 doc_dict[word] = tf_counts[word] / d_size   # TF formula
             TF_list.append(doc_dict)
+            pbar.update(1)
         return TF_list
+
+    def filter_tokens(self):
+        ## If df/self.N_D > 0.5 - remove token
+        self.doc_freq = {k:v for k,v in self.doc_freq.items() if v/self.N_D < self.DF_THRESHOLD}
         
     def TF_IFD(self):
         """
@@ -140,6 +128,7 @@ class TFIDFVectorizer:
                     continue
                 word_id = self.word_to_index(word)
                 idf = (math.log((1 + self.N_D) / (self.doc_freq[word] + 1))) + 1 # IDF formula with smoothing
+                # idf = (math.log((self.N_D) / (self.doc_freq[word] + 1))) # IDF formula with smoothing
                 tf = self.TF_list[doc_id][word]
                 tf_idf = tf * idf
                 tf_idf_matrix[doc_id][word_id] = tf_idf
@@ -163,9 +152,7 @@ if __name__ == "__main__":
     corpus = dl.load(data_path, n_rows=n_rows)
 
     start = time.time()
-    
     TFIDF = TFIDFVectorizer()
+
     TFIDF_matrix = TFIDF.fit(corpus)
-    
-    end = time.time()
-    print("total time:",end-start)
+    print("Total time:", time.time() - start)
