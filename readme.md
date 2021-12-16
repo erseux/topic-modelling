@@ -14,7 +14,7 @@ sys.path.insert(0,'/Users/august/Coding/topic-modelling')
 ```
 
 ## Data
-Load csv files like so:
+Load data like so:
 ```python
 from topic_modelling.data_loader import DataLoader
 dl = DataLoader()
