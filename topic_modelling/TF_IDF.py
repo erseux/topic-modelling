@@ -47,7 +47,7 @@ class TFIDFVectorizer:
         """
         if not df:
             df = self.test_corpus
-        if not self.test_corpus:
+        if not df:
             print("Please provide a DataFrame with test data")
 
         vector_df = df.apply(self.fit_new_sentence)
