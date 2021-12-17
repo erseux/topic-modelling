@@ -73,6 +73,7 @@ where ``corpus`` is a ``pd.DataFrame`` with just one column, consisting of the t
 ## LDA
 Initialize model:
 ```python
+from topic_modelling.LDA import LDA
 lda = LDA(corpus)
 ```
 Fit model:
