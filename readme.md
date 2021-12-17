@@ -81,7 +81,7 @@ lda.plot_word_clouds_all()
 ```
 Get words with highest probability from each topic:
 ```python
-topicswords, weights = lda.get_topics()
+topicswords, weights = lda.get_topics(max_words_per_topic=20)
 ```
 Predict an unseen sentence:
 ```python
