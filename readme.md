@@ -71,6 +71,10 @@ doc_clusters, cluster_assignments = cluster.cluster_documents(verbosity=False)
 where ``corpus`` is a ``pd.DataFrame`` with just one column, consisting of the tokenized words for each document.
 
 ## LDA
+Initialize model:
+```python
+lda = LDA(corpus)
+```
 Fit model:
 ```python
 lda.fit(verbosity=True, num_topics=9, iterations=50)
