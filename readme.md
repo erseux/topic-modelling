@@ -50,7 +50,7 @@ test_corpus = dl.load_df(test_data_df)
 
 ## TF-IDF
 ```python
-from topic_modelling.TFIDF import TFIDFVectorizer
+from topic_modelling.TF_IDF import TFIDFVectorizer
 
 TFIDF = TFIDFVectorizer()
 TFIDF_matrix = TFIDF.fit(corpus)
